@@ -1,105 +1,48 @@
-# LEVORN API
+# Ritma
 
-A REST API for appointment-based businesses (salons, clinics, studios) to manage customers, services and bookings. Built with **ASP.NET Core** and **Entity Framework Core** on **SQL Server**.
+Ritma helps appointment-based businesses manage bookings, customers, services, staff, and day-to-day operations from one responsive workspace.
 
-![.NET](https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white)
-![ASP.NET Core](https://img.shields.io/badge/ASP.NET_Core-Web_API-512BD4?logo=dotnet&logoColor=white)
-![EF Core](https://img.shields.io/badge/EF_Core-SQL_Server-CC2927?logo=microsoftsqlserver&logoColor=white)
+## What it includes
 
-## Features
+- Appointment management with list and calendar views, status updates, filters, and overlap protection.
+- A public booking page with service selection, live availability, and cancellation links.
+- Customer search and appointment/payment history.
+- Staff, service, and business schedule management.
+- Payment status tracking and date-range reports with CSV export.
+- Quick WhatsApp and email reminder drafts, plus calendar downloads for bookings.
+- JWT authentication, business-scoped data access, request validation, and rate limits on login and public booking.
 
-- **Customers**: create, list, update and delete customer records
-- **Services**: manage the service catalog (duration, price) with soft deactivation
-- **Appointments**: book, update and delete appointments
-- **Double-booking prevention**: overlapping time slots are rejected with `409 Conflict`
-- **Validation**: request DTOs with data annotations (required fields, lengths, phone/email format, ranges)
-- **Consistent errors**: `400` for invalid input, `404` for missing resources, `409` for conflicts, and a global exception handler that returns RFC 7807 problem details
-- **Migrations**: database schema is versioned with EF Core migrations
+Ritma currently tracks payment status manually. WhatsApp, SMS, and email actions open drafts; automated delivery and online card processing need provider accounts and credentials.
 
-## Tech Stack
+## Requirements
 
-| Layer | Technology |
-|---|---|
-| Framework | ASP.NET Core Web API (.NET 10) |
-| ORM | Entity Framework Core |
-| Database | SQL Server (LocalDB for development) |
-| API docs | OpenAPI (`/openapi/v1.json` in Development) |
+- .NET 10 SDK
+- SQL Server or SQL Server LocalDB
 
-## Project Structure
+## Configure and run
 
-```
-Controllers/   HTTP endpoints (Customers, Services, Appointments, Health)
-DTOs/          Request models with validation rules
-Models/        Domain entities
-Data/          LevornDbContext
-Migrations/    EF Core schema migrations
+Copy `appsettings.example.json` to `appsettings.json`, then set a database connection string and JWT settings with .NET user secrets or environment variables. Keep local and production settings out of source control.
+
+```powershell
+Copy-Item appsettings.example.json appsettings.json
 ```
 
-## API Endpoints
-
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/health` | Health check |
-| GET | `/api/customers` | List customers |
-| GET | `/api/customers/{id}` | Get a customer |
-| POST | `/api/customers` | Create a customer |
-| PUT | `/api/customers/{id}` | Update a customer |
-| DELETE | `/api/customers/{id}` | Delete a customer |
-| GET | `/api/services` | List active services |
-| POST | `/api/services` | Create a service |
-| PUT | `/api/services/{id}` | Update a service |
-| PATCH | `/api/services/{id}/deactivate` | Deactivate a service |
-| GET | `/api/appointments` | List appointments (with customer) |
-| GET | `/api/appointments/{id}` | Get an appointment |
-| POST | `/api/appointments` | Book an appointment |
-| PUT | `/api/appointments/{id}` | Update an appointment |
-| DELETE | `/api/appointments/{id}` | Delete an appointment |
-
-### Example: booking an appointment
-
-```http
-POST /api/appointments
-Content-Type: application/json
-
-{
-  "customerId": 1,
-  "startTime": "2026-10-01T14:00:00",
-  "endTime": "2026-10-01T15:00:00",
-  "notes": "First visit"
-}
-```
-
-If the slot overlaps an existing appointment, the API responds with:
-
-```json
-HTTP/1.1 409 Conflict
-{ "message": "Selected time slot is already booked." }
-```
-
-## Getting Started
-
-**Requirements:** .NET 10 SDK, SQL Server or LocalDB
-
-```bash
-git clone https://github.com/Keremcanatass-58/levorn-api.git
-cd levorn-api
-
-# create the database
+```powershell
+dotnet user-secrets init
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "<your SQL Server connection string>"
+dotnet user-secrets set "Jwt:Key" "<a random key of at least 32 characters>"
+dotnet user-secrets set "Jwt:Issuer" "Ritma"
+dotnet user-secrets set "Jwt:Audience" "Ritma"
 dotnet tool install --global dotnet-ef
 dotnet ef database update
-
-# run
-dotnet run
+dotnet run --project Ritma.Api.csproj --launch-profile http
 ```
 
-The API starts at `http://localhost:5019`. Ready-made requests for every endpoint are in [`levorn-api.http`](levorn-api.http) (runs directly in Visual Studio / VS Code / Rider).
+Open `http://localhost:5019`. In Development, the OpenAPI document is available at `/openapi/v1.json`. Create an owner account from the registration screen to set up a business workspace.
 
-To use a different database, change `ConnectionStrings:DefaultConnection` in `appsettings.json`.
+## Current integration scope
 
-## Roadmap
-
-- [ ] Service layer between controllers and data access
-- [ ] Response DTOs instead of returning entities
-- [ ] JWT authentication and roles (admin / staff)
-- [ ] Unit and integration tests (xUnit + WebApplicationFactory)
-- [ ] Docker support and CI pipeline
+- Online booking requests are saved in Ritma and can be managed from the workspace.
+- Reminder shortcuts prepare messages for the business to review and send.
+- Payments can be recorded and tracked, but no card processor or payment gateway is connected.
+- Production hosting, domain, and provider credentials must be configured for a public launch.

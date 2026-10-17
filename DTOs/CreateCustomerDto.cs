@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Levorn.Api.DTOs;
+namespace Ritma.Api.DTOs;
 
 public class CreateCustomerDto
 {

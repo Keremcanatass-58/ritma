@@ -1,9 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Levorn.Api.DTOs;
+namespace Ritma.Api.DTOs;
 
 public class CreateServiceDto
 {
+
     [Required(ErrorMessage = "Service name is required.")]
     [StringLength(100, MinimumLength = 2)]
     public string Name { get; set; } = string.Empty;
