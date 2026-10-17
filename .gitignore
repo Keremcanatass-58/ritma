@@ -1,6 +1,9 @@
 bin/
 obj/
+.nuget-appdata/
 .vs/
 .vscode/
 *.user
 *.suo
+appsettings*.json
+!appsettings.example.json

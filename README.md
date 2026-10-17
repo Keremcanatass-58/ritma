@@ -1,105 +1,102 @@
-# LEVORN API
+<div align="center">
 
-A REST API for appointment-based businesses (salons, clinics, studios) to manage customers, services and bookings. Built with **ASP.NET Core** and **Entity Framework Core** on **SQL Server**.
+<img src="wwwroot/ritma-mark.svg" width="88" alt="Ritma logosu">
 
-![.NET](https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white)
+# Ritma
+
+### Randevularınızı yönetin. İşletmenizin ritmini yakalayın.
+
+Ritma; randevuyla çalışan küçük işletmelerin takvimini, müşterilerini, ekibini, hizmetlerini ve tahsilat takibini tek bir sade çalışma alanında toplar.
+
+[Özellikler](#-özellikler) · [Ekran görüntüleri](#-ekran-görüntüleri) · [Kurulum](#-kurulum) · [Mevcut kapsam](#-mevcut-kapsam)
+
+![.NET 10](https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white)
 ![ASP.NET Core](https://img.shields.io/badge/ASP.NET_Core-Web_API-512BD4?logo=dotnet&logoColor=white)
-![EF Core](https://img.shields.io/badge/EF_Core-SQL_Server-CC2927?logo=microsoftsqlserver&logoColor=white)
+![Lisans](https://img.shields.io/badge/lisans-belirtilmedi-lightgrey)
 
-## Features
+</div>
 
-- **Customers**: create, list, update and delete customer records
-- **Services**: manage the service catalog (duration, price) with soft deactivation
-- **Appointments**: book, update and delete appointments
-- **Double-booking prevention**: overlapping time slots are rejected with `409 Conflict`
-- **Validation**: request DTOs with data annotations (required fields, lengths, phone/email format, ranges)
-- **Consistent errors**: `400` for invalid input, `404` for missing resources, `409` for conflicts, and a global exception handler that returns RFC 7807 problem details
-- **Migrations**: database schema is versioned with EF Core migrations
+---
 
-## Tech Stack
+## ✨ Özellikler
 
-| Layer | Technology |
-|---|---|
-| Framework | ASP.NET Core Web API (.NET 10) |
-| ORM | Entity Framework Core |
-| Database | SQL Server (LocalDB for development) |
-| API docs | OpenAPI (`/openapi/v1.json` in Development) |
+- **Randevu yönetimi:** Takvim veya liste görünümü, durum güncelleme, tarih filtreleri ve çakışma kontrolü.
+- **Online randevu sayfası:** Müşteriler hizmet ve uygun zaman seçerek talep oluşturabilir; işletme talepleri panelinden yönetir.
+- **Müşteri kayıtları:** Müşteri arama ile randevu ve ödeme geçmişini tek yerde görüntüleme.
+- **Ekip ve hizmetler:** Personel, hizmet, çalışma saatleri ve işletme bilgilerini yönetme.
+- **Tahsilat takibi:** Ödeme durumlarını kaydetme, tarih aralığına göre raporlama ve CSV dışa aktarma.
+- **Günlük kolaylıklar:** WhatsApp ve e-posta mesaj taslakları, takvime eklenebilir randevu dosyaları ve iptal bağlantıları.
+- **Güvenli API:** JWT kimlik doğrulama, işletme kapsamlı veri erişimi, istek doğrulama ve giriş/online randevu uçlarında hız sınırlama.
+- **Duyarlı arayüz:** Masaüstü ve mobil ekranlarda kullanılabilen yönetim paneli.
 
-## Project Structure
+## 🖥️ Ekran görüntüleri
 
-```
-Controllers/   HTTP endpoints (Customers, Services, Appointments, Health)
-DTOs/          Request models with validation rules
-Models/        Domain entities
-Data/          LevornDbContext
-Migrations/    EF Core schema migrations
-```
+### Yönetim paneli · Masaüstü
 
-## API Endpoints
+![Ritma masaüstü yönetim paneli](docs/screenshots/dashboard-desktop.png)
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/health` | Health check |
-| GET | `/api/customers` | List customers |
-| GET | `/api/customers/{id}` | Get a customer |
-| POST | `/api/customers` | Create a customer |
-| PUT | `/api/customers/{id}` | Update a customer |
-| DELETE | `/api/customers/{id}` | Delete a customer |
-| GET | `/api/services` | List active services |
-| POST | `/api/services` | Create a service |
-| PUT | `/api/services/{id}` | Update a service |
-| PATCH | `/api/services/{id}/deactivate` | Deactivate a service |
-| GET | `/api/appointments` | List appointments (with customer) |
-| GET | `/api/appointments/{id}` | Get an appointment |
-| POST | `/api/appointments` | Book an appointment |
-| PUT | `/api/appointments/{id}` | Update an appointment |
-| DELETE | `/api/appointments/{id}` | Delete an appointment |
+### Yönetim paneli · Mobil
 
-### Example: booking an appointment
+![Ritma mobil yönetim paneli](docs/screenshots/dashboard-mobile.png)
 
-```http
-POST /api/appointments
-Content-Type: application/json
+## 🚀 Kurulum
 
-{
-  "customerId": 1,
-  "startTime": "2026-10-01T14:00:00",
-  "endTime": "2026-10-01T15:00:00",
-  "notes": "First visit"
-}
+### Gereksinimler
+
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
+- SQL Server veya SQL Server LocalDB
+
+### 1. Projeyi hazırlayın
+
+```powershell
+git clone https://github.com/Keremcanatass-58/ritma.git
+cd ritma
+Copy-Item appsettings.example.json appsettings.json
 ```
 
-If the slot overlaps an existing appointment, the API responds with:
+> Depoda `appsettings.json` bulunmaz. Veritabanı ve JWT ayarlarınızı yerel ortamınızda yapılandırın; gizli bilgileri GitHub'a eklemeyin.
 
-```json
-HTTP/1.1 409 Conflict
-{ "message": "Selected time slot is already booked." }
+### 2. Gizli ayarları tanımlayın
+
+```powershell
+dotnet user-secrets init
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "<SQL Server bağlantı dizeniz>"
+dotnet user-secrets set "Jwt:Key" "<en az 32 karakterlik rastgele bir anahtar>"
+dotnet user-secrets set "Jwt:Issuer" "Ritma"
+dotnet user-secrets set "Jwt:Audience" "Ritma"
 ```
 
-## Getting Started
+### 3. Veritabanını hazırlayıp uygulamayı başlatın
 
-**Requirements:** .NET 10 SDK, SQL Server or LocalDB
-
-```bash
-git clone https://github.com/Keremcanatass-58/levorn-api.git
-cd levorn-api
-
-# create the database
+```powershell
 dotnet tool install --global dotnet-ef
 dotnet ef database update
-
-# run
-dotnet run
+dotnet run --project Ritma.Api.csproj --launch-profile http
 ```
 
-The API starts at `http://localhost:5019`. Ready-made requests for every endpoint are in [`levorn-api.http`](levorn-api.http) (runs directly in Visual Studio / VS Code / Rider).
+Uygulamayı **http://localhost:5019** adresinde açın. İlk işletme çalışma alanını oluşturmak için kayıt ekranından bir sahip hesabı açın. Geliştirme ortamındaki OpenAPI belgesi **http://localhost:5019/openapi/v1.json** adresindedir.
 
-To use a different database, change `ConnectionStrings:DefaultConnection` in `appsettings.json`.
+## 🧭 Mevcut kapsam
 
-## Roadmap
+Ritma, randevu ve işletme yönetimi için çalışan bir uygulama/API temelidir. Kapsamı doğru değerlendirebilmeniz için mevcut durumu açıkça belirtiyoruz:
 
-- [ ] Service layer between controllers and data access
-- [ ] Response DTOs instead of returning entities
-- [ ] JWT authentication and roles (admin / staff)
-- [ ] Unit and integration tests (xUnit + WebApplicationFactory)
-- [ ] Docker support and CI pipeline
+- Ödemeler kaydedilip raporlanabilir; **kartla ödeme alma veya ödeme sağlayıcısı bağlantısı henüz yoktur.**
+- WhatsApp ve e-posta kısayolları **gönderime hazır taslak açar**; otomatik gönderim ve SMS sağlayıcısı bağlantısı henüz yoktur.
+- İnternete açık kullanım için barındırma, alan adı, üretim veritabanı ve ilgili sağlayıcı hesapları ayrıca yapılandırılmalıdır.
+
+## 🧰 Teknoloji
+
+- ASP.NET Core Web API · .NET 10
+- SQL Server ve Entity Framework Core
+- JWT kimlik doğrulama
+- Duyarlı HTML/CSS/JavaScript arayüzü
+
+## 📄 Lisans
+
+Bu depoda henüz bir açık kaynak lisans dosyası bulunmuyor. Lisans eklenene kadar kodun yeniden kullanım ve dağıtım hakları tanımlanmış değildir.
+
+---
+
+<div align="center">
+Ritma · İşletmenizin günlük akışı için tek bir çalışma alanı.
+</div>

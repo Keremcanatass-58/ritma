@@ -1,10 +1,15 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Levorn.Api.DTOs;
+namespace Ritma.Api.DTOs;
 
 public class CreateAppointmentDto
 {
-    [Required]
+    [Range(1, int.MaxValue)]
+    public int ServiceId { get; set; }
+    [Range(1, int.MaxValue)]
+    public int StaffId { get; set; }
+
+    [Range(1, int.MaxValue)]
     public int CustomerId { get; set; }
 
     [Required]
@@ -13,7 +18,7 @@ public class CreateAppointmentDto
     [Required]
     public DateTime EndTime { get; set; }
 
-    [StringLength(50)]
+    [RegularExpression("^(Pending|Confirmed|Completed|Cancelled)$")]
     public string Status { get; set; } = "Pending";
 
     [StringLength(500)]

@@ -1,9 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Levorn.Api.DTOs;
+namespace Ritma.Api.DTOs;
 
 public class UpdateCustomerDto
 {
+
     [Required(ErrorMessage = "First name is required.")]
     [StringLength(50, MinimumLength = 2)]
     public string FirstName { get; set; } = string.Empty;
